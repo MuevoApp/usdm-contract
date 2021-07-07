@@ -1,0 +1,30 @@
+{
+  "name": "usdm",
+  "version": "1.0.0",
+  "description": "USDM. Muevo US Dollar",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test ./test/usdm.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@truffle/debug-utils": "^5.0.10",
+    "@truffle/hdwallet-provider": "^1.2.2",
+    "bignumber.js": "^9.0.1",
+    "chai": "^4.3.0",
+    "ganache-cli": "^6.12.2",
+    "mocha": "^8.1.2",
+    "pify": "^5.0.0",
+    "prettier": "^2.2.1",
+    "prettier-plugin-solidity": "*",
+    "solc": "^0.6.12",
+    "truffle": "^5.1.67",
+    "truffle-assertions": "^0.9.2",
+    "truffle-flattener": "^1.5.0",
+    "web3": "^1.4.0"
+  }
+}
