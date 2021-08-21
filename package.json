@@ -9,7 +9,7 @@
   "scripts": {
     "test": "truffle test ./test/usdm.js"
   },
-  "author": "",
+  "author": "Muevo",
   "license": "ISC",
   "devDependencies": {
     "@truffle/debug-utils": "^5.0.10",
@@ -19,7 +19,7 @@
     "ganache-cli": "^6.12.2",
     "mocha": "^8.1.2",
     "pify": "^5.0.0",
-    "prettier": "^2.2.1",
+    "prettier": "^2.3.2",
     "prettier-plugin-solidity": "*",
     "solc": "^0.6.12",
     "truffle": "^5.1.67",

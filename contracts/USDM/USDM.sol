@@ -44,218 +44,218 @@ pragma solidity 0.6.12;
  */
 
 contract USDM {
-  struct Discount {
-    bool valid;
-    uint256 customFee;
-    address businessAddress;
-  }
-
-  address public owner;
-  address public feeRecipient;
-
-  uint256 public decimals = 18;
-  uint256 public standardFee = 10;
-  uint256 public maximumFee = 12e18;
-
-  string public name = 'USD Muevo';
-  string public symbol = 'USDm';
-
-  event Deposit(address indexed dst, uint256 wad);
-  event Withdrawal(address indexed src, uint256 wad);
-
-  event Approval(address indexed src, address indexed guy, uint256 wad);
-  event Transfer(address indexed src, address indexed dst, uint256 wad);
-
-  event AddDiscount(uint256 customFee, address indexed businessAddress);
-  event RemoveDiscount(address indexed businessAddress);
-  event ChangeStandardFee(uint256 newStandardFee);
-
-  event TransferBusiness(
-    address indexed src,
-    address indexed dst,
-    uint256 wad,
-    uint256 fee,
-    uint256 total
-  );
-
-  mapping(address => uint256) public balanceOf;
-  mapping(address => mapping(address => uint256)) public allowance;
-
-  mapping(address => Discount) public discount;
-
-  constructor() public {
-    owner = msg.sender;
-    feeRecipient = msg.sender;
-  }
-
-  receive() external payable {
-    deposit();
-  }
-
-  function deposit() public payable {
-    balanceOf[msg.sender] += msg.value;
-    emit Deposit(msg.sender, msg.value);
-  }
-
-  function withdraw(uint256 wad) public {
-    require(balanceOf[msg.sender] >= wad);
-    balanceOf[msg.sender] -= wad;
-    msg.sender.transfer(wad);
-    emit Withdrawal(msg.sender, wad);
-  }
-
-  function totalSupply() public view returns (uint256) {
-    return address(this).balance;
-  }
-
-  function approve(address guy, uint256 wad) public returns (bool) {
-    allowance[msg.sender][guy] = wad;
-    emit Approval(msg.sender, guy, wad);
-    return true;
-  }
-
-  function transfer(address dst, uint256 wad) public returns (bool) {
-    return transferFrom(msg.sender, dst, wad);
-  }
-
-  function transferBusiness(address dst, uint256 wad) public returns (bool) {
-    return transferFromBusiness(msg.sender, dst, wad);
-  }
-
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 wad
-  ) public returns (bool) {
-    require(balanceOf[src] >= wad);
-
-    if (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {
-      require(allowance[src][msg.sender] >= wad);
-      allowance[src][msg.sender] -= wad;
+    struct Discount {
+        bool valid;
+        uint256 customFee;
+        address businessAddress;
     }
 
-    balanceOf[src] -= wad;
-    balanceOf[dst] += wad;
+    address public owner;
+    address public feeRecipient;
 
-    emit Transfer(src, dst, wad);
+    uint256 public decimals = 18;
+    uint256 public standardFee = 10;
+    uint256 public maximumFee = 12e18;
 
-    return true;
-  }
+    string public name = "USD Muevo";
+    string public symbol = "USDm";
 
-  function transferFromBusiness(
-    address src,
-    address dst,
-    uint256 wad
-  ) public returns (bool) {
-    require(balanceOf[src] >= wad);
+    event Deposit(address indexed dst, uint256 wad);
+    event Withdrawal(address indexed src, uint256 wad);
 
-    if (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {
-      require(allowance[src][msg.sender] >= wad);
-      allowance[src][msg.sender] -= wad;
+    event Approval(address indexed src, address indexed guy, uint256 wad);
+    event Transfer(address indexed src, address indexed dst, uint256 wad);
+
+    event AddDiscount(uint256 customFee, address indexed businessAddress);
+    event RemoveDiscount(address indexed businessAddress);
+    event ChangeStandardFee(uint256 newStandardFee);
+
+    event TransferBusiness(
+        address indexed src,
+        address indexed dst,
+        uint256 wad,
+        uint256 fee,
+        uint256 total
+    );
+
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    mapping(address => Discount) public discount;
+
+    constructor() public {
+        owner = msg.sender;
+        feeRecipient = msg.sender;
     }
 
-    uint256 fee;
-    uint256 total;
-
-    uint256 feePercentage;
-
-    if (!discount[dst].valid) {
-      feePercentage = standardFee;
-    } else {
-      feePercentage = discount[dst].customFee;
+    receive() external payable {
+        deposit();
     }
 
-    fee = mulDiv(wad, feePercentage, 1000);
-
-    if (fee >= maximumFee) {
-      fee = maximumFee;
+    function deposit() public payable {
+        balanceOf[msg.sender] += msg.value;
+        emit Deposit(msg.sender, msg.value);
     }
 
-    total = wad - fee;
+    function withdraw(uint256 wad) public {
+        require(balanceOf[msg.sender] >= wad);
+        balanceOf[msg.sender] -= wad;
+        msg.sender.transfer(wad);
+        emit Withdrawal(msg.sender, wad);
+    }
 
-    balanceOf[src] -= wad;
-    balanceOf[dst] += total;
-    balanceOf[feeRecipient] += fee;
+    function totalSupply() public view returns (uint256) {
+        return address(this).balance;
+    }
 
-    TransferBusiness(src, dst, wad, fee, total);
+    function approve(address guy, uint256 wad) public returns (bool) {
+        allowance[msg.sender][guy] = wad;
+        emit Approval(msg.sender, guy, wad);
+        return true;
+    }
 
-    return true;
-  }
+    function transfer(address dst, uint256 wad) public returns (bool) {
+        return transferFrom(msg.sender, dst, wad);
+    }
 
-  function addDiscount(uint256 customFee, address businessAddress)
-    public
-    returns (bool)
-  {
-    require(msg.sender == owner);
-    require(customFee >= 0);
+    function transferBusiness(address dst, uint256 wad) public returns (bool) {
+        return transferFromBusiness(msg.sender, dst, wad);
+    }
 
-    discount[businessAddress] = Discount({
-      valid: true,
-      customFee: customFee,
-      businessAddress: businessAddress
-    });
+    function transferFrom(
+        address src,
+        address dst,
+        uint256 wad
+    ) public returns (bool) {
+        require(balanceOf[src] >= wad);
 
-    emit AddDiscount(customFee, businessAddress);
+        if (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {
+            require(allowance[src][msg.sender] >= wad);
+            allowance[src][msg.sender] -= wad;
+        }
 
-    return true;
-  }
+        balanceOf[src] -= wad;
+        balanceOf[dst] += wad;
 
-  function removeDiscount(address businessAddress) public returns (bool) {
-    require(msg.sender == owner);
-    require(discount[businessAddress].valid);
+        emit Transfer(src, dst, wad);
 
-    delete discount[businessAddress];
+        return true;
+    }
 
-    emit RemoveDiscount(businessAddress);
-    return true;
-  }
+    function transferFromBusiness(
+        address src,
+        address dst,
+        uint256 wad
+    ) public returns (bool) {
+        require(balanceOf[src] >= wad);
 
-  function changeStandardFee(uint256 newStandardFee) public returns (bool) {
-    require(msg.sender == owner);
-    require(newStandardFee >= 0);
+        if (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {
+            require(allowance[src][msg.sender] >= wad);
+            allowance[src][msg.sender] -= wad;
+        }
 
-    standardFee = newStandardFee;
+        uint256 fee;
+        uint256 total;
 
-    emit ChangeStandardFee(newStandardFee);
-    return true;
-  }
+        uint256 feePercentage;
 
-  function fullMul(uint256 x, uint256 y)
-    public
-    pure
-    returns (uint256 l, uint256 h)
-  {
-    uint256 mm = mulmod(x, y, uint256(-1));
-    l = x * y;
-    h = mm - l;
-    if (mm < l) h -= 1;
-  }
+        if (!discount[dst].valid) {
+            feePercentage = standardFee;
+        } else {
+            feePercentage = discount[dst].customFee;
+        }
 
-  function mulDiv(
-    uint256 x,
-    uint256 y,
-    uint256 z
-  ) public pure returns (uint256) {
-    (uint256 l, uint256 h) = fullMul(x, y);
-    require(h < z);
-    uint256 mm = mulmod(x, y, z);
-    if (mm > l) h -= 1;
-    l -= mm;
-    uint256 pow2 = z & -z;
-    z /= pow2;
-    l /= pow2;
-    l += h * ((-pow2) / pow2 + 1);
-    uint256 r = 1;
-    r *= 2 - z * r;
-    r *= 2 - z * r;
-    r *= 2 - z * r;
-    r *= 2 - z * r;
-    r *= 2 - z * r;
-    r *= 2 - z * r;
-    r *= 2 - z * r;
-    r *= 2 - z * r;
-    return l * r;
-  }
+        fee = mulDiv(wad, feePercentage, 1000);
+
+        if (fee >= maximumFee) {
+            fee = maximumFee;
+        }
+
+        total = wad - fee;
+
+        balanceOf[src] -= wad;
+        balanceOf[dst] += total;
+        balanceOf[feeRecipient] += fee;
+
+        TransferBusiness(src, dst, wad, fee, total);
+
+        return true;
+    }
+
+    function addDiscount(uint256 customFee, address businessAddress)
+        public
+        returns (bool)
+    {
+        require(msg.sender == owner);
+        require(customFee >= 0);
+
+        discount[businessAddress] = Discount({
+            valid: true,
+            customFee: customFee,
+            businessAddress: businessAddress
+        });
+
+        emit AddDiscount(customFee, businessAddress);
+
+        return true;
+    }
+
+    function removeDiscount(address businessAddress) public returns (bool) {
+        require(msg.sender == owner);
+        require(discount[businessAddress].valid);
+
+        delete discount[businessAddress];
+
+        emit RemoveDiscount(businessAddress);
+        return true;
+    }
+
+    function changeStandardFee(uint256 newStandardFee) public returns (bool) {
+        require(msg.sender == owner);
+        require(newStandardFee >= 0);
+
+        standardFee = newStandardFee;
+
+        emit ChangeStandardFee(newStandardFee);
+        return true;
+    }
+
+    function fullMul(uint256 x, uint256 y)
+        public
+        pure
+        returns (uint256 l, uint256 h)
+    {
+        uint256 mm = mulmod(x, y, uint256(-1));
+        l = x * y;
+        h = mm - l;
+        if (mm < l) h -= 1;
+    }
+
+    function mulDiv(
+        uint256 x,
+        uint256 y,
+        uint256 z
+    ) public pure returns (uint256) {
+        (uint256 l, uint256 h) = fullMul(x, y);
+        require(h < z);
+        uint256 mm = mulmod(x, y, z);
+        if (mm > l) h -= 1;
+        l -= mm;
+        uint256 pow2 = z & -z;
+        z /= pow2;
+        l /= pow2;
+        l += h * ((-pow2) / pow2 + 1);
+        uint256 r = 1;
+        r *= 2 - z * r;
+        r *= 2 - z * r;
+        r *= 2 - z * r;
+        r *= 2 - z * r;
+        r *= 2 - z * r;
+        r *= 2 - z * r;
+        r *= 2 - z * r;
+        r *= 2 - z * r;
+        return l * r;
+    }
 }
 
 /*
